@@ -10,8 +10,6 @@
   </div>
 </template>
 
-<style lang="css"></style>
-
 <script>
   const isUploadComplete = status =>
     status === 'upload failed' || status === 'upload successful' || status === 'canceled'
@@ -19,7 +17,8 @@
   export default {
     props: {
       id: {
-        type: Number
+        type: Number,
+        default: null
       },
       hideBeforeStart: {
         type: Boolean,
@@ -46,10 +45,6 @@
       }
     },
 
-    created () {
-      this._createEventHandlers()
-    },
-
     mounted () {
       if (this._isTotalProgress) {
         this.uploader.on('totalProgress', this._trackProgressEventHandler)
@@ -61,74 +56,60 @@
     },
 
     beforeDestroy () {
-      this._unmounted = true
+      this._unmounted = true;
       this._unregisterEventHandlers()
     },
 
     methods: {
-      _createEventHandlers () {
-        if (this._isTotalProgress) {
-          this._trackProgressEventHandler = (bytesUploaded, totalSize) => {
-            this.setState({ bytesUploaded, totalSize })
+      _trackProgressEventHandler (id, name, bytesUploaded, totalSize) {
+          if (this._isTotalProgress) {
+              this.$set(this.state, 'totalSize', totalSize);
           }
-        } else {
-          this._trackProgressEventHandler = (id, name, bytesUploaded, totalSize) => {
-            if (id === this.id) {
-              this.$set(this.state, 'bytesUploaded', totalSize)
-            }
-          }
-        }
+          this.$set(this.state, 'bytesUploaded', bytesUploaded);
+      },
 
-        this._trackStatusEventHandler = (id, oldStatus, newStatus) => {
-          if (!this._unmounted) {
-            if (this._isTotalProgress) {
-              if (
-                !this.state.hidden &&
-                this.hideOnComplete &&
-                isUploadComplete(newStatus) &&
-                !this.uploader.methods.getInProgress()
-              ) {
-                this.$set(this.state, 'hidden', true)
-              } else if (this.state.hidden && this.uploader.methods.getInProgress()) {
-                this.$set(this.state, 'hidden', false)
-              }
-            } else if (id === this.id) {
-              if (this.state.hidden && newStatus === 'uploading') {
-                this.$set(this.state, 'hidden', false)
-              } else if (!this.state.hidden && this.hideOnComplete && isUploadComplete(newStatus)) {
-                this.$set(this.state, 'hidden', true)
-              }
-            }
+      _trackStatusEventHandler (id, oldStatus, newStatus) {
+        if (this._isTotalProgress) {
+          if (!this.state.hidden && this.hideOnComplete && isUploadComplete(newStatus) && !this.uploader.methods.getInProgress()) {
+            this.$set(this.state, 'hidden', true);
+          } else if (this.state.hidden && this.uploader.methods.getInProgress()) {
+            this.$set(this.state, 'hidden', false);
+          }
+        } else if (id === this.id) {
+            if (this.state.hidden && newStatus === 'uploading') {
+            this.$set(this.state, 'hidden', false);
+          } else if (!this.state.hidden && this.hideOnComplete && isUploadComplete(newStatus)) {
+            this.$set(this.state, 'hidden', true);
           }
         }
       },
 
       _unregisterEventHandlers () {
         if (this._isTotalProgress) {
-          this.uploader.off('totalProgress', this._trackProgressEventHandler)
+          this.uploader.off('totalProgress', this._trackProgressEventHandler);
         } else {
-          this.uploader.off('progress', this._trackProgressEventHandler)
+          this.uploader.off('progress', this._trackProgressEventHandler);
         }
 
-        this.uploader.off('statusChange', this._trackStatusEventHandler)
+        this.uploader.off('statusChange', this._trackStatusEventHandler);
       }
     },
 
     computed: {
       _isTotalProgress () {
-        return !!this.id
+        return this.id === null;
       },
 
       className () {
-        return this._isTotalProgress ? 'vue-fine-uploader-total-progress-bar' : 'vue-fine-uploader-file-progress-bar'
+        return this._isTotalProgress ? 'vue-fine-uploader-total-progress-bar' : 'vue-fine-uploader-file-progress-bar';
       },
 
       containerClassName () {
-        return `${this.className}-container`
+        return `${this.className}-container`;
       },
 
       percentWidth () {
-        return this.state.bytesUploaded / this.state.totalSize * 100 || 0
+        return this.state.bytesUploaded / this.state.totalSize * 100 || 0;
       }
     }
   }

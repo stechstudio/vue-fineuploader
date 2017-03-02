@@ -4,8 +4,6 @@
   </div>
 </template>
 
-<style lang="css"></style>
-
 <script>
   import qq from 'fine-uploader/lib/dnd'
 

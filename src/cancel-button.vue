@@ -1,5 +1,5 @@
 <template>
-  <button v-if="onlyRenderIfCancelable || state.cancelable"
+  <button v-if="(onlyRenderIfCancelable && state.cancelable) || !onlyRenderIfCancelable"
           aria-label="cancel"
           class="vue-fine-uploader-cancel-button"
           :disabled="!state.cancelable"
@@ -7,8 +7,6 @@
       <slot>Cancel</slot>
   </button>
 </template>
-
-<style lang="css"></style>
 
 <script>
   const isCancelable = status => {

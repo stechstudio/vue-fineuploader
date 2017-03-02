@@ -4,8 +4,6 @@
   </span>
 </template>
 
-<style lang="css"></style>
-
 <script>
   import isPlainObject from 'lodash.isplainobject'
 

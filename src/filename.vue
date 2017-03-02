@@ -4,8 +4,6 @@
   </span>
 </template>
 
-<style lang="css"></style>
-
 <script>
   export default {
     props: {
